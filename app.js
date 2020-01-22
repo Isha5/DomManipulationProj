@@ -9,14 +9,33 @@ loadEventListeners();
 
 function loadEventListeners() {
     
+    //LOAD TASKS FROM LS
+    document.addEventListener('DOMContentLoaded', getTasks);
     //ADD TASKS
     form.addEventListener('submit', addTask);
     //DELETE TASKS
     taskList.addEventListener('click', removeTask);
+    //CLEAR TASKS
+    clearBtn.addEventListener('click', clearTasks);
     //FILTER TASKS
     filter.addEventListener('keyup', filterTasks);
 
 } 
+
+//GET TASKS FROM LS
+function getTasks() {
+    let tasks;
+    if(localStorage.getItem('tasks') === null) {
+        tasks = [];
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+    }
+    
+        tasks.forEach(function(task) {
+            createDOMElement(task);
+        });
+    
+}
 
 //CREATE DOM ELEMENT FOR THE TASKS
 function createDOMElement(t) {
@@ -37,6 +56,7 @@ function addTask(e) {
         return;
     } 
         createDOMElement(taskInput.value);
+        storeToLocalStorage(taskInput.value);
         taskInput.value = '';
     
     e.preventDefault();
@@ -60,7 +80,53 @@ function removeTask(e) {
         if(confirm('Are you sure to delete?')) {
             e.target.parentElement.parentElement.remove();
         }
-        
+        // REMOVE FROM LS
+        removeFromLocalStorage(e.target.parentElement.parentElement);
     }
 }
+
+//STORAGE
+function storeToLocalStorage(task) {
+    let tasks;
+    if(localStorage.getItem('tasks') === null) {
+        tasks = [];
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+    }
+    tasks.push(task);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+//REMOVE FROM LS
+function  removeFromLocalStorage(taskItem) {
+    let tasks;
+    if(localStorage.getItem('tasks') === null) {
+        tasks = [];
+    } else {
+        tasks = JSON.parse(localStorage.getItem('tasks'));
+    }
+    tasks.forEach(function(task, index) {
+        if(taskItem.textContent === task) {
+            tasks.splice(index, 1);
+        }
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    })
+}
+
+// CLEAR ALL TASK FROM UL
+function clearTasks() {
+    //FIRST METHOD TO CLEAR ALL TASKS
+        //taskList.innerHTML = '';
+
+    while(taskList.firstChild) {
+        taskList.removeChild(taskList.firstChild);
+    }
+    //CLEAR TASKS FROM LS
+    clearTasksFromLocalStorage();
+}
+//CLEAR TASKS FROM LS
+function clearTasksFromLocalStorage() {
+    localStorage.clear();
+}
+
 
